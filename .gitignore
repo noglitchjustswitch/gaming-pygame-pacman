@@ -1,3 +1,15 @@
+# experiment files
+*uisito*.*
+*Leo*.*
+*nom*.*
+*nam*.*
+*boo*.*
+eyes*.*
+win*.*
+
+# VS Code workspaces
+*.code-workspace 
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
