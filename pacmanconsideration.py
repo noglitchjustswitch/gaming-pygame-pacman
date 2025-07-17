@@ -1056,6 +1056,19 @@ while run:
         ghost_speeds[1] = 0
         ghost_speeds[2] = 0
         ghost_speeds[3] = 0
+        blinky_x = 430
+        blinky_y = 330
+        blinky_direction = 0
+        inky_x = 370
+        inky_y = 420
+        inky_direction = 2
+        pinky_x = 430
+        pinky_y = 420
+        pinky_direction = 2
+        clyde_x = 490
+        clyde_y = 420
+        clyde_direction = 2
+
 
         
 
@@ -1066,6 +1079,20 @@ while run:
         ghost_speeds[1] = 0
         ghost_speeds[2] = 0
         ghost_speeds[3] = 0
+        player_x = 370
+        player_y = 420
+        blinky_x = 430
+        blinky_y = 330
+        blinky_direction = 0
+        inky_x = 370
+        inky_y = 420
+        inky_direction = 2
+        pinky_x = 430
+        pinky_y = 420
+        pinky_direction = 2
+        clyde_x = 490
+        clyde_y = 420
+        clyde_direction = 2
         
 
     #toggle_color(color)

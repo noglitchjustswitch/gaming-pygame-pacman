@@ -59,6 +59,7 @@ pinky_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/pink.
 inky_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/blue.png'), (45, 45))
 clyde_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/orange.png'), (45, 45))
 spooked_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/powerup.png'), (45, 45))
+spooked_white_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/powerupwhite.png'), (45, 45))
 dead_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/dead.png'), (45, 45))
 icon = pygame.transform.scale(pygame.image.load(f'assets/player_images/1.png'), (50, 50))
 pygame.display.set_icon(icon)
@@ -82,6 +83,7 @@ flicker = False
 # R, L, U, D
 turns_allowed = [False, False, False, False]
 direction_command = 0
+current_spooked = spooked_img
 player_speed = 2
 score = 0
 powerup = False
@@ -125,7 +127,7 @@ class Ghost:
         if (not powerup and not self.dead) or (eaten_ghost[self.id] and powerup and not self.dead):
             screen.blit(self.img, (self.x_pos, self.y_pos))
         elif powerup and not self.dead and not eaten_ghost[self.id]:
-            screen.blit(spooked_img, (self.x_pos, self.y_pos))
+            screen.blit(current_spooked, (self.x_pos, self.y_pos))
         else:
             screen.blit(dead_img, (self.x_pos, self.y_pos))
         ghost_rect = pygame.rect.Rect((self.center_x - 18, self.center_y - 18), (36, 36))
@@ -975,6 +977,10 @@ while run:
         startup_counter += 1
     else:
         moving = True
+    if powerup and power_counter >= 480:
+        current_spooked = spooked_white_img
+    elif powerup and power_counter <= 480:
+        current_spooked = spooked_img
 
 
     screen.fill('black')
@@ -1056,6 +1062,19 @@ while run:
         ghost_speeds[1] = 0
         ghost_speeds[2] = 0
         ghost_speeds[3] = 0
+        blinky_x = 430
+        blinky_y = 330
+        blinky_direction = 0
+        inky_x = 370
+        inky_y = 420
+        inky_direction = 2
+        pinky_x = 430
+        pinky_y = 420
+        pinky_direction = 2
+        clyde_x = 490
+        clyde_y = 420
+        clyde_direction = 2
+
 
         
 
@@ -1066,6 +1085,20 @@ while run:
         ghost_speeds[1] = 0
         ghost_speeds[2] = 0
         ghost_speeds[3] = 0
+        player_x = 370
+        player_y = 420
+        blinky_x = 430
+        blinky_y = 330
+        blinky_direction = 0
+        inky_x = 370
+        inky_y = 420
+        inky_direction = 2
+        pinky_x = 430
+        pinky_y = 420
+        pinky_direction = 2
+        clyde_x = 490
+        clyde_y = 420
+        clyde_direction = 2
         
 
     #toggle_color(color)
