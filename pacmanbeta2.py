@@ -1,11 +1,11 @@
 # Build Pac-Man from Scratch in Python with Pygame!!
 import copy
 from board import boards
-from board3 import boards3
 import pygame
 import math
 import time
 import turtle
+import random
 
 pygame.init()
 pygame.mixer.init()
@@ -53,13 +53,19 @@ clyde_eyes_played = False
 intermission_played = False
 PI = math.pi
 player_images = []
-for i in range(1, 5):
-    player_images.append(pygame.transform.scale(pygame.image.load(f'assets/player_images/{i}.png'), (45, 45)))
-blinky_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/red.png'), (45, 45))
+ghost_images = []
+for i in range(1, 4):
+    player_images.append(pygame.transform.scale(pygame.image.load(f'assets/player_images/pacman{i}.png'), (50, 50)))
+for i in range(1, 2):
+    ghost_images.append(pygame.transform.scale(pygame.image.load(f'assets/ghost_images/blinky{i}.png'), (45, 45)))
+blinky_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/blinky1.png'), (45, 45))
+pacman1 = pygame.transform.scale(pygame.image.load(f'assets/player_images/pacman1.png'), (38, 45))
+pacman2 = pygame.transform.scale(pygame.image.load(f'assets/player_images/pacman2.png'), (25, 45))
 pinky_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/pink.png'), (45, 45))
-inky_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/blue.png'), (45, 45))
-clyde_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/orange.png'), (45, 45))
-spooked_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/powerup.png'), (45, 45))
+inky_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/inky.png'), (45, 45))
+clyde_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/clyde.png'), (45, 45))
+spooked_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/power.png'), (45, 45))
+spooked_white_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/powerwhite.png'), (45, 45))
 dead_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/dead.png'), (45, 45))
 icon = pygame.transform.scale(pygame.image.load(f'assets/player_images/1.png'), (50, 50))
 pygame.display.set_icon(icon)
@@ -83,6 +89,7 @@ flicker = False
 # R, L, U, D
 turns_allowed = [False, False, False, False]
 direction_command = 0
+current_spooked = spooked_img
 player_speed = 2
 score = 0
 powerup = False
@@ -104,7 +111,6 @@ lives = 3
 game_over = False
 game_won = False
 first_loop_done = False
-num_of_levels = 0
 
 
 class Ghost:
@@ -127,7 +133,7 @@ class Ghost:
         if (not powerup and not self.dead) or (eaten_ghost[self.id] and powerup and not self.dead):
             screen.blit(self.img, (self.x_pos, self.y_pos))
         elif powerup and not self.dead and not eaten_ghost[self.id]:
-            screen.blit(spooked_img, (self.x_pos, self.y_pos))
+            screen.blit(current_spooked, (self.x_pos, self.y_pos))
         else:
             screen.blit(dead_img, (self.x_pos, self.y_pos))
         ghost_rect = pygame.rect.Rect((self.center_x - 18, self.center_y - 18), (36, 36))
@@ -775,7 +781,7 @@ def draw_board(color):
             if level[i][j] == 1:
                 pygame.draw.circle(screen, 'white', (j * num2 + (0.5 * num2), i * num1 + (0.5 * num1)), 4)
             if level[i][j] == 2 and not flicker:
-                pygame.draw.circle(screen, 'white', (j * num2 + (0.5 * num2), i * num1 + (0.5 * num1)), 10)
+                pygame.draw.circle(screen, 'white', (j * num2 + (0.5 * num2), i * num1 + (0.5 * num1)), 14)
             if level[i][j] == 3:
                 pygame.draw.line(screen, color, (j * num2 + (0.5 * num2), i*num1), (j * num2 + (0.5 * num2), i*num1 + num1), 3)
                 #pygame.draw.line(screen, toggle_color(color) if game_won == False else color_normal, (j * num2 + (0.5 * num2), i*num1), (j * num2 + (0.5 * num2), i*num1 + num1), 3)
@@ -795,15 +801,16 @@ def draw_board(color):
             
 
 def draw_player():
+    index = (counter // 3) % len(player_images)
     # 0-RIGHT, 1-LEFT, 2-UP, 3-DOWN
     if direction == 0:
-        screen.blit(player_images[counter // 5], (player_x, player_y))
+        screen.blit(player_images[index], (player_x, player_y))
     elif direction == 1:
-        screen.blit(pygame.transform.flip(player_images[counter // 5], True, False), (player_x, player_y))
+        screen.blit(pygame.transform.flip(player_images[index], True, False), (player_x, player_y))
     elif direction == 2:
-        screen.blit(pygame.transform.rotate(player_images[counter // 5], 90), (player_x, player_y))
+        screen.blit(pygame.transform.rotate(player_images[index], 90), (player_x, player_y))
     elif direction == 3:
-        screen.blit(pygame.transform.rotate(player_images[counter // 5], 270), (player_x, player_y))
+        screen.blit(pygame.transform.rotate(player_images[index], 270), (player_x, player_y))
 
 def check_position(centerx, centery):
     turns = [False, False, False, False]
@@ -977,10 +984,10 @@ while run:
         startup_counter += 1
     else:
         moving = True
-    if num_of_levels == 10:
-        level = boards3
-    else:
-        level = boards
+    if powerup and power_counter >= 480:
+        current_spooked = spooked_white_img
+    elif powerup and power_counter <= 480:
+        current_spooked = spooked_img
 
 
     screen.fill('black')
@@ -1062,6 +1069,19 @@ while run:
         ghost_speeds[1] = 0
         ghost_speeds[2] = 0
         ghost_speeds[3] = 0
+        blinky_x = 430
+        blinky_y = 330
+        blinky_direction = 0
+        inky_x = 370
+        inky_y = 420
+        inky_direction = 2
+        pinky_x = 430
+        pinky_y = 420
+        pinky_direction = 2
+        clyde_x = 490
+        clyde_y = 420
+        clyde_direction = 2
+
 
         
 
@@ -1072,6 +1092,20 @@ while run:
         ghost_speeds[1] = 0
         ghost_speeds[2] = 0
         ghost_speeds[3] = 0
+        player_x = 370
+        player_y = 420
+        blinky_x = 430
+        blinky_y = 330
+        blinky_direction = 0
+        inky_x = 370
+        inky_y = 420
+        inky_direction = 2
+        pinky_x = 430
+        pinky_y = 420
+        pinky_direction = 2
+        clyde_x = 490
+        clyde_y = 420
+        clyde_direction = 2
         
 
     #toggle_color(color)
@@ -1158,7 +1192,6 @@ while run:
                 moving = False
                 startup_counter = 0
                 siren_playing = toggle_siren(False)
-                num_of_levels = 0
 
         if powerup and player_circle.colliderect(blinky.rect) and eaten_ghost[0] and not blinky.dead:
             if lives > 0:
@@ -1192,7 +1225,6 @@ while run:
                 game_over = True
                 moving = False
                 startup_counter = 0
-                num_of_levels = 0
         if powerup and player_circle.colliderect(inky.rect) and eaten_ghost[1] and not inky.dead:
             if lives > 0:
                 lives -= 1
@@ -1225,7 +1257,6 @@ while run:
                 game_over = True
                 moving = False
                 startup_counter = 0
-                num_of_levels = 0
         if powerup and player_circle.colliderect(pinky.rect) and eaten_ghost[2] and not pinky.dead:
             if lives > 0:
                 lives -= 1
@@ -1258,7 +1289,6 @@ while run:
                 game_over = True
                 moving = False
                 startup_counter = 0
-                num_of_levels = 0
         if powerup and player_circle.colliderect(clyde.rect) and eaten_ghost[3]and not clyde.dead:
             if lives > 0:
                 lives -= 1
@@ -1291,8 +1321,6 @@ while run:
                 game_over = True
                 moving = False
                 startup_counter = 0
-                num_of_levels = 0
-                
     if powerup and player_circle.colliderect(blinky.rect) and not blinky.dead and not eaten_ghost[0]:
         blinky_dead = True
         eaten_ghost[0] = True
@@ -1327,7 +1355,7 @@ while run:
                 direction_command = 2
             if event.key == pygame.K_DOWN:
                 direction_command = 3
-            if event.key == pygame.K_SPACE and (game_won or game_over):
+            if event.key == pygame.K_SPACE and (game_over or game_won):
                 lives -= 1
                 startup_counter = 0
                 blinky_eyes.stop()
@@ -1338,7 +1366,6 @@ while run:
                 intermission.stop()
                 intermission_played = False
                 start.play()
-                num_of_levels += 1
                 powerup = False
                 power_counter = 0
                 player_x = 430
@@ -1371,10 +1398,6 @@ while run:
                 color = 'blue'
                 player_speed = 2
                 siren_playing = toggle_siren(True)
-            if event.key == pygame.K_SPACE and game_over:
-                num_of_levels = 0
-                level = copy.deepcopy(boards)
-
                 
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_RIGHT and direction_command == 0:
