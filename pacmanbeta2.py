@@ -57,16 +57,17 @@ ghost_images = []
 for i in range(1, 4):
     player_images.append(pygame.transform.scale(pygame.image.load(f'assets/player_images/pacman{i}.png'), (50, 50)))
 for i in range(1, 2):
-    ghost_images.append(pygame.transform.scale(pygame.image.load(f'assets/ghost_images/blinky{i}.png'), (45, 45)))
-blinky_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/blinky1.png'), (45, 45))
+    ghost_images.append(pygame.transform.scale(pygame.image.load(f'assets/ghost_images/blinkyright{i}.png'), (45, 45)))
+blinky_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/blinkyright1.png'), (45, 45))
 pacman1 = pygame.transform.scale(pygame.image.load(f'assets/player_images/pacman1.png'), (38, 45))
 pacman2 = pygame.transform.scale(pygame.image.load(f'assets/player_images/pacman2.png'), (25, 45))
-pinky_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/pink.png'), (45, 45))
-inky_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/inky.png'), (45, 45))
-clyde_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/clyde.png'), (45, 45))
+pinky_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/pinkyright1.png'), (45, 45))
+inky_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/inkyright1.png'), (45, 45))
+clyde_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/clyderight1.png'), (45, 45))
 spooked_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/power.png'), (45, 45))
 spooked_white_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/powerwhite.png'), (45, 45))
-dead_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/dead.png'), (45, 45))
+dead_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/eyes.png'), (45, 45))
+lives_img = pygame.transform.scale(pygame.image.load(f'assets/player_images/lives.png'), (35, 35))
 icon = pygame.transform.scale(pygame.image.load(f'assets/player_images/1.png'), (50, 50))
 pygame.display.set_icon(icon)
 player_x = 430
@@ -724,7 +725,7 @@ def draw_misc():
     if powerup:
         pygame.draw.circle(screen, 'blue', (140, 930), 15)
     for i in range(lives):
-        screen.blit(pygame.transform.scale(player_images[0], (30, 30)), (650 + i * 40, 915))
+        screen.blit(pygame.transform.scale(lives_img, (35, 35)), (650 + i * 40, 915))
     if game_over:
         pygame.draw.rect(screen, 'white', [50, 200, 800, 300], 0, 10)
         pygame.draw.rect(screen, 'dark gray', [70, 220, 760, 260], 0, 10)
@@ -1111,7 +1112,7 @@ while run:
     #toggle_color(color)
         
             
-    player_circle = pygame.draw.circle(screen, 'black', (center_x, center_y), 20, 2)
+    player_circle = pygame.draw.circle(screen, 'black', (center_x, center_y), 5, 2)
     draw_player()
     blinky = Ghost(blinky_x, blinky_y, targets[0], ghost_speeds[0], blinky_img, blinky_direction, blinky_dead,
                    blinky_box, 0)
