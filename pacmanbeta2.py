@@ -12,6 +12,7 @@ pygame.mixer.init()
 
 WIDTH = 900
 HEIGHT = 950
+ANIM_SPEED = 200
 screen = pygame.display.set_mode([WIDTH, HEIGHT])
 timer = pygame.time.Clock()
 clock = pygame.time.Clock()
@@ -46,6 +47,7 @@ death_played = False
 start_played = False
 scared_played = False
 start.play()
+start_played = False
 blinky_eyes_played = False
 inky_eyes_played = False
 pinky_eyes_played = False
@@ -58,13 +60,20 @@ for i in range(1, 4):
     player_images.append(pygame.transform.scale(pygame.image.load(f'assets/player_images/pacman{i}.png'), (50, 50)))
 for i in range(1, 2):
     ghost_images.append(pygame.transform.scale(pygame.image.load(f'assets/ghost_images/blinkyright{i}.png'), (45, 45)))
-blinky_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/blinkyright1.png'), (45, 45))
+def load_scaled(path, size=(45, 45)):
+    image = pygame.image.load(path).convert_alpha()
+    return pygame.transform.smoothscale(image, size)
+#blinky_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/blinkyright1.png'), (45, 45))
+blinky_frames = [load_scaled(f'assets/ghost_images/blinkyright{n}.png') for n in [1, 2]]
 pacman1 = pygame.transform.scale(pygame.image.load(f'assets/player_images/pacman1.png'), (38, 45))
 pacman2 = pygame.transform.scale(pygame.image.load(f'assets/player_images/pacman2.png'), (25, 45))
-pinky_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/pinkyright1.png'), (45, 45))
-inky_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/inkyright1.png'), (45, 45))
-clyde_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/clyderight1.png'), (45, 45))
-spooked_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/power.png'), (45, 45))
+#pinky_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/pinkyright1.png'), (45, 45))
+pinky_frames = [load_scaled(f'assets/ghost_images/pinkyright{n}.png') for n in [1, 2]]
+#inky_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/inkyright1.png'), (45, 45))
+inky_frames = [load_scaled(f'assets/ghost_images/inkyright{n}.png') for n in [1, 2]]
+#clyde_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/clyderight1.png'), (45, 45))
+clyde_frames = [load_scaled(f'assets/ghost_images/clyderight{n}.png') for n in [1, 2]]
+spooked_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/power1.png'), (45, 45))
 spooked_white_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/powerwhite.png'), (45, 45))
 dead_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/eyes.png'), (45, 45))
 lives_img = pygame.transform.scale(pygame.image.load(f'assets/player_images/lives.png'), (35, 35))
@@ -113,9 +122,8 @@ game_over = False
 game_won = False
 first_loop_done = False
 
-
 class Ghost:
-    def __init__(self, x_coord, y_coord, target, speed, img, direct, dead, box, id):
+    def __init__(self, x_coord, y_coord, target, speed, img, direct, dead, box, id, anim_timer):
         self.x_pos = x_coord
         self.y_pos = y_coord
         self.center_x = self.x_pos + 22
@@ -127,18 +135,27 @@ class Ghost:
         self.dead = dead
         self.in_box = box
         self.id = id
-        self.turns, self.in_box = self.check_collisions()
+        self.turns, self.in_box = self.check_collisions()        
+        self.animation_timer = anim_timer
+        self.frame_index = 0
         self.rect = self.draw()
 
     def draw(self):
         if (not powerup and not self.dead) or (eaten_ghost[self.id] and powerup and not self.dead):
-            screen.blit(self.img, (self.x_pos, self.y_pos))
+            #screen.blit(self.img, (self.x_pos, self.y_pos))
+            self.get_frame_index()
+            screen.blit(self.img[self.frame_index], (self.x_pos, self.y_pos))
         elif powerup and not self.dead and not eaten_ghost[self.id]:
             screen.blit(current_spooked, (self.x_pos, self.y_pos))
         else:
             screen.blit(dead_img, (self.x_pos, self.y_pos))
         ghost_rect = pygame.rect.Rect((self.center_x - 18, self.center_y - 18), (36, 36))
         return ghost_rect
+   
+    def get_frame_index(self):
+        if self.animation_timer >= ANIM_SPEED:
+            self.animation_timer = 0
+            self.frame_index = (self.frame_index + 1) % 2
 
     def check_collisions(self):
         num1 = ((HEIGHT - 50)//32)
@@ -736,6 +753,8 @@ def draw_misc():
         pygame.draw.rect(screen, 'dark gray', [70, 220, 760, 260], 0, 10)
         gamewon_text = font.render('Victory! Space bar to restart!', True, 'green')
         screen.blit(gamewon_text, (100, 300))
+    
+        
 
 def toggle_color(color):
     if game_won:
@@ -966,6 +985,7 @@ def get_targets(blink_x, blink_y, ink_x, ink_y, pink_x, pink_y, clyd_x, clyd_y, 
 run = True
 while run:
     timer.tick(fps)
+    dt = clock.tick(60)
     if counter < 19:
         counter += 1
         if counter > 13:
@@ -1114,14 +1134,14 @@ while run:
             
     player_circle = pygame.draw.circle(screen, 'black', (center_x, center_y), 5, 2)
     draw_player()
-    blinky = Ghost(blinky_x, blinky_y, targets[0], ghost_speeds[0], blinky_img, blinky_direction, blinky_dead,
-                   blinky_box, 0)
-    inky = Ghost(inky_x, inky_y, targets[1], ghost_speeds[1], inky_img, inky_direction, inky_dead,
-                 inky_box, 1)
-    pinky = Ghost(pinky_x, pinky_y, targets[2], ghost_speeds[2], pinky_img, pinky_direction, pinky_dead,
-                  pinky_box, 2)
-    clyde = Ghost(clyde_x, clyde_y, targets[3], ghost_speeds[3], clyde_img, clyde_direction, clyde_dead,
-                  clyde_box, 3)
+    blinky = Ghost(blinky_x, blinky_y, targets[0], ghost_speeds[0], blinky_frames, blinky_direction, blinky_dead,
+                   blinky_box, 0, dt)
+    inky = Ghost(inky_x, inky_y, targets[1], ghost_speeds[1], inky_frames, inky_direction, inky_dead,
+                 inky_box, 1, dt)
+    pinky = Ghost(pinky_x, pinky_y, targets[2], ghost_speeds[2], pinky_frames, pinky_direction, pinky_dead,
+                  pinky_box, 2, dt)
+    clyde = Ghost(clyde_x, clyde_y, targets[3], ghost_speeds[3], clyde_frames, clyde_direction, clyde_dead,
+                  clyde_box, 3, dt)
     scared_played = targets[4]
     draw_misc()
     targets = get_targets(blinky_x, blinky_y, inky_x, inky_y, pinky_x, pinky_y, clyde_x, clyde_y, scared_played)

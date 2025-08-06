@@ -12,7 +12,7 @@ BLACK = (0, 0, 0)
 POWER_DURATION = 5000  # 5 seconds
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Blinky vs Pac-Man with Power Pellet")
+pygame.display.set_caption("Pinky vs Pac-Man with Power Pellet")
 clock = pygame.time.Clock()
 
 # Helper to load and scale sprites
@@ -22,7 +22,7 @@ def load_scaled(path, size=(50, 50)):
 
 # Load Blinky frames
 blinky_frames = [
-    load_scaled(f'assets/ghost_images/blinkyright{n}.png') for n in [1, 2]
+    load_scaled(f'assets/ghost_images/pinkyright{n}.png') for n in [1, 2]
 ]
 blinky_blue_frames = [
     load_scaled(f'assets/ghost_images/power1.png') for n in [1, 2]
@@ -67,6 +67,7 @@ pacman_anim_timer = 0
 BLINKY_ANIM_SPEED = 200
 PACMAN_ANIM_SPEED = 150
 
+
 # Movement and timers
 pacman_dx, pacman_dy = 0, 0
 direction_change_timer = 0
@@ -109,7 +110,7 @@ while running:
     if blinky_state == "eyes" and keys[pygame.K_SPACE]:
         if blinky_home_rect.collidepoint(blinky_rect.center):
             blinky_state = "normal"
-            print("Blinky manually respawned inside home base.")
+            print("Pinky manually respawned inside home base.")
 
 
     # === PAC-MAN ANIMATION & MOVEMENT ===
@@ -183,25 +184,25 @@ while running:
         power_pellet_eaten = True
         blinky_state = "vulnerable"
         power_timer = POWER_DURATION
-        print("Power pellet eaten! Blinky is vulnerable!")
+        print("Power pellet eaten! Pinky is vulnerable!")
 
     # === Power Timer Handling ===
     if blinky_state == "vulnerable":
         power_timer -= dt
         if power_timer <= 0:
             blinky_state = "normal"
-            print("Blinky is back to normal.")
+            print("Pinky is back to normal.")
 
     # === Blinky Eaten by Pac-Man ===
     if blinky_state == "vulnerable" and pacman_rect.colliderect(blinky_rect):
         blinky_state = "eyes"
-        print("Pac-Man ate Blnky! Blinky is returning to base as eyes.")
+        print("Pac-Man ate Pinky! Pinky is returning to base as eyes.")
 
     # === Blinky Catches Pac-Man ===
     if blinky_state == "normal" and blinky_rect.colliderect(pacman_rect):
         pacman_caught = True
         pacman_dx = pacman_dy = 0
-        print("Blinky caught Pac-Man!")
+        print("Pinky caught Pac-Man!")
 
     # === DRAWING ===
     # Draw home base
