@@ -3,9 +3,6 @@ import copy
 from board import boards
 import pygame
 import math
-import time
-import turtle
-import random
 
 pygame.init()
 pygame.mixer.init()
@@ -38,6 +35,7 @@ clyde_eaten_sound = pygame.mixer.Sound('assets/Sounds/eat_ghost.wav')
 eat_dot = pygame.mixer.Sound('assets/Sounds/eat_dot_0.wav')
 siren = pygame.mixer.Sound('assets/Sounds/siren0.wav')
 intermission = pygame.mixer.Sound('assets/Sounds/intermission.wav')
+eat_fruit = pygame.mixer.Sound('assets/Sounds/eat_fruit.wav')
 siren_playing = False
 blinky_eaten_played = False
 inky_eaten_played = False
@@ -78,6 +76,7 @@ spooked_white_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_imag
 dead_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/eyes.png'), (45, 45))
 lives_img = pygame.transform.scale(pygame.image.load(f'assets/player_images/lives.png'), (35, 35))
 icon = pygame.transform.scale(pygame.image.load(f'assets/player_images/1.png'), (50, 50))
+cherry_img = pygame.transform.scale(pygame.image.load(f'assets/fruits/cherry.png'), (45, 45))
 pygame.display.set_icon(icon)
 player_x = 430
 player_y = 663
@@ -94,6 +93,12 @@ pinky_direction = 2
 clyde_x = 490
 clyde_y = 420
 clyde_direction = 2
+cherry_x = 434
+cherry_y = 495
+cherry_rect = cherry_img.get_rect(topleft=(cherry_x, cherry_y))
+cherry_collected = False
+cherry_timer = 0
+CHERRY_RESPAWN_TIME = 20_000
 counter = 0
 flicker = False
 # R, L, U, D
@@ -118,6 +123,7 @@ moving = False
 ghost_speeds = [2, 2, 2, 2]
 startup_counter = 0
 lives = 3
+cherry = 1
 game_over = False
 game_won = False
 first_loop_done = False
@@ -338,7 +344,7 @@ class Ghost:
         if self.x_pos < -30:
             self.x_pos = 900
         elif self.x_pos > 900:
-            self.x_pos - 30
+            self.x_pos -30
         return self.x_pos, self.y_pos, self.direction
 
     def move_blinky(self):
@@ -480,7 +486,7 @@ class Ghost:
         if self.x_pos < -30:
             self.x_pos = 900
         elif self.x_pos > 900:
-            self.x_pos - 30
+            self.x_pos -30
         return self.x_pos, self.y_pos, self.direction
 
     def move_inky(self):
@@ -605,7 +611,7 @@ class Ghost:
         if self.x_pos < -30:
             self.x_pos = 900
         elif self.x_pos > 900:
-            self.x_pos - 30
+            self.x_pos -30
         return self.x_pos, self.y_pos, self.direction
 
     def move_pinky(self):
@@ -733,7 +739,7 @@ class Ghost:
         if self.x_pos < -30:
             self.x_pos = 900
         elif self.x_pos > 900:
-            self.x_pos - 30
+            self.x_pos -30
         return self.x_pos, self.y_pos, self.direction
 
 def draw_misc():
@@ -743,6 +749,8 @@ def draw_misc():
         pygame.draw.circle(screen, 'blue', (140, 930), 15)
     for i in range(lives):
         screen.blit(pygame.transform.scale(lives_img, (35, 35)), (650 + i * 40, 915))
+    for i in range(cherry):
+        screen.blit(pygame.transform.scale(cherry_img, (35, 35)), (150 + i * 40, 915))
     if game_over:
         pygame.draw.rect(screen, 'white', [50, 200, 800, 300], 0, 10)
         pygame.draw.rect(screen, 'dark gray', [70, 220, 760, 260], 0, 10)
@@ -1009,6 +1017,8 @@ while run:
         current_spooked = spooked_white_img
     elif powerup and power_counter <= 480:
         current_spooked = spooked_img
+    cherry_timer += dt
+
 
 
     screen.fill('black')
@@ -1130,9 +1140,20 @@ while run:
         
 
     #toggle_color(color)
-        
-            
+    if cherry_collected:
+        cherry_timer += dt    
+    if cherry_collected and cherry_timer >= CHERRY_RESPAWN_TIME:
+        cherry_collected = False
+        cherry_timer = 0        
     player_circle = pygame.draw.circle(screen, 'black', (center_x, center_y), 5, 2)
+    cherry_rect.topleft = (cherry_x, cherry_y)
+    if not cherry_collected:
+        screen.blit(cherry_img, (cherry_rect))
+    if not cherry_collected and player_circle.colliderect(cherry_rect):
+        cherry_collected = True
+        score += 100
+        eat_fruit.play()
+
     draw_player()
     blinky = Ghost(blinky_x, blinky_y, targets[0], ghost_speeds[0], blinky_frames, blinky_direction, blinky_dead,
                    blinky_box, 0, dt)
