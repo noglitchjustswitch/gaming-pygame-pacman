@@ -55,7 +55,7 @@ PI = math.pi
 player_images = []
 ghost_images = []
 for i in range(1, 4):
-    player_images.append(pygame.transform.scale(pygame.image.load(f'assets/player_images/pacman{i}.png'), (50, 50)))
+    player_images.append(pygame.transform.scale(pygame.image.load(f'assets/player_images/pacman{i}h.png'), (45, 45)))
 for i in range(1, 2):
     ghost_images.append(pygame.transform.scale(pygame.image.load(f'assets/ghost_images/blinkyright{i}.png'), (45, 45)))
 def load_scaled(path, size=(45, 45)):
