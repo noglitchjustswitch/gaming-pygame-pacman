@@ -73,10 +73,18 @@ inky_frames = [load_scaled(f'assets/ghost_images/inkyright{n}.png') for n in [1,
 clyde_frames = [load_scaled(f'assets/ghost_images/clyderight{n}.png') for n in [1, 2]]
 spooked_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/power1.png'), (45, 45))
 spooked_white_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/powerwhite.png'), (45, 45))
-dead_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/eyes.png'), (45, 45))
+dead_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/eyesright.png'), (45, 45))
 lives_img = pygame.transform.scale(pygame.image.load(f'assets/player_images/lives.png'), (35, 35))
-icon = pygame.transform.scale(pygame.image.load(f'assets/player_images/1.png'), (50, 50))
+icon = pygame.transform.scale(pygame.image.load(f'assets/player_images/pacman1.png'), (50, 50))
 cherry_img = pygame.transform.scale(pygame.image.load(f'assets/fruits/cherry.png'), (45, 45))
+# Global dictionary to store ghost eye images per direction
+EYE_IMAGES = {
+    0: pygame.transform.scale(pygame.image.load('assets/ghost_images/eyesright.png'), (45, 45)),
+    1: pygame.transform.scale(pygame.image.load('assets/ghost_images/eyesleft.png'), (45, 45)),
+    2: pygame.transform.scale(pygame.image.load('assets/ghost_images/eyesup.png'), (45, 45)),
+    3: pygame.transform.scale(pygame.image.load('assets/ghost_images/eyesdown.png'), (45, 45)),
+}
+
 pygame.display.set_icon(icon)
 player_x = 430
 player_y = 663
@@ -145,6 +153,7 @@ class Ghost:
         self.animation_timer = anim_timer
         self.frame_index = 0
         self.rect = self.draw()
+        
 
     def draw(self):
         if (not powerup and not self.dead) or (eaten_ghost[self.id] and powerup and not self.dead):
@@ -154,6 +163,7 @@ class Ghost:
         elif powerup and not self.dead and not eaten_ghost[self.id]:
             screen.blit(current_spooked, (self.x_pos, self.y_pos))
         else:
+            dead_img = EYE_IMAGES[self.direction]
             screen.blit(dead_img, (self.x_pos, self.y_pos))
         ghost_rect = pygame.rect.Rect((self.center_x - 18, self.center_y - 18), (36, 36))
         return ghost_rect
@@ -344,7 +354,7 @@ class Ghost:
         if self.x_pos < -30:
             self.x_pos = 900
         elif self.x_pos > 900:
-            self.x_pos -30
+            self.x_pos = -30
         return self.x_pos, self.y_pos, self.direction
 
     def move_blinky(self):
@@ -486,7 +496,7 @@ class Ghost:
         if self.x_pos < -30:
             self.x_pos = 900
         elif self.x_pos > 900:
-            self.x_pos -30
+            self.x_pos = -30
         return self.x_pos, self.y_pos, self.direction
 
     def move_inky(self):
@@ -611,7 +621,7 @@ class Ghost:
         if self.x_pos < -30:
             self.x_pos = 900
         elif self.x_pos > 900:
-            self.x_pos -30
+            self.x_pos = -30
         return self.x_pos, self.y_pos, self.direction
 
     def move_pinky(self):
@@ -739,7 +749,7 @@ class Ghost:
         if self.x_pos < -30:
             self.x_pos = 900
         elif self.x_pos > 900:
-            self.x_pos -30
+            self.x_pos = -30
         return self.x_pos, self.y_pos, self.direction
 
 def draw_misc():
@@ -1152,7 +1162,7 @@ while run:
     if not cherry_collected and player_circle.colliderect(cherry_rect):
         cherry_collected = True
         score += 100
-        eat_fruit.play()
+        eat_fruit.play() 
 
     draw_player()
     blinky = Ghost(blinky_x, blinky_y, targets[0], ghost_speeds[0], blinky_frames, blinky_direction, blinky_dead,
