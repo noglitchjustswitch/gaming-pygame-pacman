@@ -74,12 +74,15 @@ pinky_frames = [load_scaled(f'assets/ghost_images/pinkyright{n}.png') for n in [
 inky_frames = [load_scaled(f'assets/ghost_images/inkyright{n}.png') for n in [1, 2]]
 #clyde_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/clyderight1.png'), (45, 45))
 clyde_frames = [load_scaled(f'assets/ghost_images/clyderight{n}.png') for n in [1, 2]]
-spooked_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/power1.png'), (45, 45))
-spooked_white_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/powerwhite.png'), (45, 45))
+spooked_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/scared1.png'), (45, 45))
+spooked_white_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/powerwhite1.png'), (45, 45))
 dead_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/eyesright.png'), (45, 45))
 lives_img = pygame.transform.scale(pygame.image.load(f'assets/player_images/lives.png'), (35, 35))
 icon = pygame.transform.scale(pygame.image.load(f'assets/player_images/pacman1.png'), (50, 50))
 cherry_img = pygame.transform.scale(pygame.image.load(f'assets/fruits/cherry.png'), (45, 45))
+dot_img = pygame.transform.scale(pygame.image.load(f'assets/dots/dot.png'), (45, 45))
+power_pellet_img = pygame.transform.scale(pygame.image.load(f'assets/dots/power_pellet.png'), (45, 45))
+
 # Global dictionary to store ghost eye images per direction
 EYE_IMAGES = {
     0: pygame.transform.scale(pygame.image.load('assets/ghost_images/eyesright.png'), (45, 45)),
@@ -160,16 +163,25 @@ class Ghost:
 
     def draw(self):
         if (not powerup and not self.dead) or (eaten_ghost[self.id] and powerup and not self.dead):
-            #screen.blit(self.img, (self.x_pos, self.y_pos))
             self.get_frame_index()
-            screen.blit(self.img[self.frame_index], (self.x_pos, self.y_pos))
+            frame = self.img[self.frame_index]
+
+            # Flip horizontally if direction is left (assuming 1 means left)
+            if self.direction == 1:  
+                frame = pygame.transform.flip(frame, True, False)
+            
+            screen.blit(frame, (self.x_pos, self.y_pos))
+        
         elif powerup and not self.dead and not eaten_ghost[self.id]:
             screen.blit(current_spooked, (self.x_pos, self.y_pos))
+        
         else:
             dead_img = EYE_IMAGES[self.direction]
             screen.blit(dead_img, (self.x_pos, self.y_pos))
+
         ghost_rect = pygame.rect.Rect((self.center_x - 18, self.center_y - 18), (36, 36))
         return ghost_rect
+
    
     def get_frame_index(self):
         if self.animation_timer >= ANIM_SPEED:
@@ -1040,10 +1052,15 @@ while run:
         startup_counter += 1
     else:
         moving = True
-    if powerup and power_counter >= 480:
-        current_spooked = spooked_white_img
-    elif powerup and power_counter <= 480:
-        current_spooked = spooked_img
+    if powerup:
+        if power_counter >= 420:
+            if (pygame.time.get_ticks() // 400) % 2 == 0:
+                current_spooked = spooked_white_img
+            else:
+                current_spooked = spooked_img
+        else:
+            current_spooked = spooked_img
+
     cherry_timer += dt
 
 
@@ -1112,7 +1129,7 @@ while run:
     
 
     if game_won and not intermission_played:
-        intermission.play()
+        intermission.play(loops=1)
         intermission_played = True
     
     if game_won:    
@@ -1191,6 +1208,7 @@ while run:
     clyde = Ghost(clyde_x, clyde_y, targets[3], ghost_speeds[3], clyde_frames, clyde_direction, clyde_dead,
                   clyde_box, 3, dt)
     scared_played = targets[4]
+    
     draw_misc()
     targets = get_targets(blinky_x, blinky_y, inky_x, inky_y, pinky_x, pinky_y, clyde_x, clyde_y, scared_played)
     center_x = player_x + 23
